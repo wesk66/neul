@@ -219,13 +219,16 @@
       justify-content: center;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
+    #save-btn:hover {
+      transform: scale(1.05);
+      border-color: #999;
+    }
   </style>
 </head>
 <body>
   <div id="opening-text">supports latin alphabet, & 한글</div>
 
   <button id="save-btn">ㅅ</button>
-  <div id="save-confirm">
 
   <div class="float-buttons">
     <button id="highlight-btn">ㄱ</button>
@@ -253,9 +256,6 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
-    const saveConfirm = document.getElementById('save-confirm');
-    const confirmSave = document.getElementById('confirm-save');
-    const cancelSave = document.getElementById('cancel-save');
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
@@ -335,14 +335,8 @@
       clearConfirm.style.display = 'none';
     });
 
-    // Save text confirmation popup and file download
+    // Save button: instantly download the editor content as a .txt file
     saveBtn.addEventListener('click', () => {
-      saveConfirm.style.display = 'block';
-    });
-    cancelSave.addEventListener('click', () => {
-      saveConfirm.style.display = 'none';
-    });
-    confirmSave.addEventListener('click', () => {
       const text = editor.innerText;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
@@ -350,9 +344,10 @@
       link.download = '글-download.txt';
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      saveConfirm.style.display = 'none';
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
     });
+
   </script>
 
   <!-- PWA: Register service worker -->
