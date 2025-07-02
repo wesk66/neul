@@ -247,12 +247,6 @@
       user-select: none;
     }
   </style>
-
-  <script>
-    document.addEventListener('gesturestart', function (e) {
-      e.preventDefault();
-    });
-  </script>
 </head>
 <body>
   <div id="opening-text">supports latin alphabet, & 한글</div>
@@ -276,137 +270,29 @@
   <div id="editor" contenteditable="true" spellcheck="false"></div>
 
   <!-- Landscape warning -->
-  <div id="landscape-warning">Please use portrait orientation for best experience.</div>
+  <div id="landscape-warning">
+    <p>Please rotate your device back to portrait mode to continue.</p>
+  </div>
 
   <script>
-    const editor = document.getElementById('editor');
-    const highlightBtn = document.getElementById('highlight-btn');
-    const italicBtn = document.getElementById('italic-btn');
-    const fontSizeBtn = document.getElementById('font-size-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const clearConfirm = document.getElementById('clear-confirm');
-    const confirmClear = document.getElementById('confirm-clear');
-    const cancelClear = document.getElementById('cancel-clear');
-    const saveBtn = document.getElementById('save-btn');
     const landscapeWarning = document.getElementById('landscape-warning');
 
-    // Mobile detection
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    function checkOrientation() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
-    // DEBUG toggle - force mobile detection for desktop testing
-    const debugForceMobile = true; // <-- set to false to disable force on desktop
-
-    const effectiveIsMobile = debugForceMobile ? true : isMobile;
-
-    function checkLandscapeWarning() {
-      if (!effectiveIsMobile) {
-        landscapeWarning.style.display = 'none';
-        return;
-      }
-      if (window.matchMedia("(orientation: landscape)").matches) {
+      if (width > height && width < 1024) {
         landscapeWarning.style.display = 'flex';
       } else {
         landscapeWarning.style.display = 'none';
       }
     }
 
-    window.addEventListener('load', checkLandscapeWarning);
-    window.addEventListener('resize', checkLandscapeWarning);
-    window.addEventListener('orientationchange', checkLandscapeWarning);
+    // Initial check
+    checkOrientation();
 
-    window.addEventListener('load', () => {
-      const saved = localStorage.getItem('saved-text');
-      if (saved) editor.innerHTML = saved;
-      setTimeout(() => {
-        document.getElementById('opening-text').style.opacity = '0';
-      }, 1500);
-      setTimeout(() => {
-        document.getElementById('opening-text').style.display = 'none';
-      }, 4000);
-    });
-
-    window.addEventListener('beforeunload', () => {
-      localStorage.setItem('saved-text', editor.innerHTML);
-    });
-
-    highlightBtn.addEventListener('click', () => {
-      highlightBtn.classList.toggle('rotate-left');
-      const selection = window.getSelection();
-      if (!selection.rangeCount || selection.isCollapsed) return;
-      const range = selection.getRangeAt(0);
-      const span = document.createElement('span');
-      span.style.backgroundColor = '#64b5f6';
-      span.style.lineHeight = '1.4';
-      span.style.display = 'inline';
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      selection.removeAllRanges();
-    });
-
-    italicBtn.addEventListener('click', () => {
-      italicBtn.classList.toggle('rotate-right');
-      const selection = window.getSelection();
-      if (!selection.rangeCount || selection.isCollapsed) return;
-      const range = selection.getRangeAt(0);
-      const em = document.createElement('em');
-      em.appendChild(range.extractContents());
-      range.insertNode(em);
-      selection.removeAllRanges();
-    });
-
-    const sizes = [
-      { size: '1.4rem', circle: '6px' },
-      { size: '1.8rem', circle: '10px' },
-      { size: '2.2rem', circle: '14px' }
-    ];
-    let currentSize = 1;
-    function updateFontSize() {
-      const size = sizes[currentSize];
-      editor.style.fontSize = size.size;
-      document.getElementById('circle-indicator').style.width = size.circle;
-      document.getElementById('circle-indicator').style.height = size.circle;
-    }
-    fontSizeBtn.addEventListener('click', () => {
-      currentSize = (currentSize + 1) % sizes.length;
-      updateFontSize();
-    });
-    updateFontSize();
-
-    clearBtn.addEventListener('click', () => {
-      clearConfirm.style.display = 'block';
-    });
-    cancelClear.addEventListener('click', () => {
-      clearConfirm.style.display = 'none';
-    });
-    confirmClear.addEventListener('click', () => {
-      editor.innerHTML = '';
-      localStorage.removeItem('saved-text');
-      clearConfirm.style.display = 'none';
-    });
-
-    saveBtn.addEventListener('click', () => {
-      const text = editor.innerText;
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'neul-download.txt';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    });
-  </script>
-
-  <!-- PWA: Register service worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        }).catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-      });
-    }
+    // Listen for resize events
+    window.addEventListener('resize', checkOrientation);
   </script>
 
 </body>
