@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>neul</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
+
+  <!-- PWA: Add manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- PWA: Add theme color for address bar -->
+  <meta name="theme-color" content="#64b5f6" />
+
   <style>
-    /* Your original CSS exactly as is */
     *, *::before, *::after {
       box-sizing: border-box;
     }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -22,6 +29,7 @@
       max-width: 100vw;
       max-height: 100vh;
     }
+
     #opening-text {
       position: fixed;
       top: 50%;
@@ -38,6 +46,7 @@
       white-space: normal;
       transition: opacity 2.5s ease-in-out;
     }
+
     #editor {
       position: absolute;
       top: 0;
@@ -67,9 +76,11 @@
       background: #dcdcdc;
       color: inherit;
     }
+
+    /* Float buttons container with subtle vertical grey line on left side */
     .float-buttons {
       position: fixed;
-      right: 1.1rem;
+      right: 1.1rem;  /* moved slightly left */
       top: 0;
       bottom: 0;
       display: flex;
@@ -78,12 +89,13 @@
       gap: 1.5rem;
       z-index: 15;
       padding-left: 0.6rem;
-      border-left: 1px solid rgba(0,0,0,0.1);
+      border-left: 1px solid rgba(0,0,0,0.1); /* subtle, low opacity */
       background: transparent;
       user-select: none;
-      height: 100vh;
+      height: 100vh; /* full vertical coverage */
       justify-content: center;
     }
+
     .float-buttons button {
       width: 40px;
       height: 40px;
@@ -101,28 +113,35 @@
       justify-content: center;
       padding: 0;
       line-height: 1;
-      font-weight: normal;
     }
     .float-buttons button:hover {
       transform: scale(1.05);
       border-color: #999;
     }
+    .float-buttons button.rotate-left {
+      transform: rotate(-180deg);
+    }
+    .float-buttons button.rotate-right {
+      transform: rotate(180deg);
+    }
+
     #font-size-btn {
       margin-top: 12.5rem;
       position: relative;
     }
+
     #circle-indicator {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      border: 2px solid #444;
+      border: 2px solid #222;
       border-radius: 50%;
       width: 10px;
       height: 10px;
       pointer-events: none;
-      background: transparent;
     }
+
     #clear-btn {
       position: fixed;
       bottom: 1rem;
@@ -143,17 +162,17 @@
       line-height: 1;
       padding: 0;
       transition: transform 0.2s ease, border-color 0.3s ease;
-      font-weight: normal;
     }
     #clear-btn:hover {
       transform: scale(1.05);
       border-color: #999;
     }
+
     #clear-confirm {
       position: fixed;
       bottom: 4.5rem;
       right: 1rem;
-      background: white;
+      background: #eee;
       padding: 0.5rem 1rem;
       border-radius: 5px;
       border: 1px solid #ccc;
@@ -161,10 +180,6 @@
       font-family: 'Gaegu', cursive;
       z-index: 19;
       user-select: none;
-      width: max-content;
-      white-space: nowrap;
-      color: black;
-      font-weight: normal;
     }
     #clear-confirm button {
       margin: 0 0.3rem;
@@ -175,12 +190,70 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.15s ease;
-      color: black;
+      color: #007BFF; /* normal blue */
       user-select: none;
-      font-weight: normal;
     }
     #clear-confirm button:hover {
-      background-color: #e0e0e0;
+      background-color: #cce4ff;
+      transform: scale(1.15);
+    }
+
+    #save-btn {
+      position: fixed;
+      top: 2.5rem; /* Moved further down */
+      right: 1rem;
+      z-index: 20;
+      width: 40px;  /* square shape like others */
+      height: 40px; /* square shape like others */
+      font-family: 'Gaegu', cursive;
+      font-size: 1.5rem;
+      line-height: 1;
+      padding: 0;
+      border-radius: 8px; /* same rounded square */
+      cursor: pointer;
+      background: white;
+      border: 1.5px solid #ccc;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, border-color 0.3s ease;
+    }
+    #save-btn:hover {
+      transform: scale(1.05);
+      border-color: #999;
+    }
+
+    #save-confirm {
+      position: fixed;
+      top: 3.5rem;
+      right: 1rem;
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 0.75rem 1rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-family: 'Gaegu', cursive;
+      z-index: 20;
+      display: none;
+      user-select: none;
+    }
+    #save-confirm button {
+      cursor: pointer;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid #999;
+      border-radius: 4px;
+      background: white;
+      font-family: 'Gaegu', cursive;
+      font-size: 1rem;
+      margin: 0 0.3rem;
+      min-width: 60px;
+      color: #007BFF; /* normal blue */
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      user-select: none;
+    }
+    #save-confirm button:hover {
+      background-color: #cce4ff;
       transform: scale(1.15);
     }
   </style>
@@ -189,6 +262,10 @@
   <div id="opening-text">supports latin alphabet, & 한글</div>
 
   <button id="save-btn">ㅅ</button>
+  <div id="save-confirm">
+    <button id="confirm-save">ㅗ</button>
+    <button id="cancel-save">ㅜ</button>
+  </div>
 
   <div class="float-buttons">
     <button id="highlight-btn">ㄱ</button>
@@ -216,9 +293,13 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
+    const saveConfirm = document.getElementById('save-confirm');
+    const confirmSave = document.getElementById('confirm-save');
+    const cancelSave = document.getElementById('cancel-save');
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
+    // On page load, restore saved text if available
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
@@ -230,10 +311,12 @@
       }, 4000);
     });
 
+    // Save editor content on unload
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('saved-text', editor.innerHTML);
     });
 
+    // Highlight button toggles background color for selected text
     highlightBtn.addEventListener('click', () => {
       highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
@@ -248,6 +331,7 @@
       selection.removeAllRanges();
     });
 
+    // Italic button toggles emphasis tag for selected text
     italicBtn.addEventListener('click', () => {
       italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
@@ -259,6 +343,7 @@
       selection.removeAllRanges();
     });
 
+    // Font sizes and circle indicator sizes
     const sizes = [
       { size: '1.4rem', circle: '6px' },
       { size: '1.8rem', circle: '10px' },
@@ -277,6 +362,7 @@
     });
     updateFontSize();
 
+    // Clear text confirmation popup
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -289,16 +375,38 @@
       clearConfirm.style.display = 'none';
     });
 
+    // Save text confirmation popup and file download
     saveBtn.addEventListener('click', () => {
+      saveConfirm.style.display = 'block';
+    });
+    cancelSave.addEventListener('click', () => {
+      saveConfirm.style.display = 'none';
+    });
+    confirmSave.addEventListener('click', () => {
       const text = editor.innerText;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'neul글.txt';
+      link.download = '글-download.txt';
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
+      saveConfirm.style.display = 'none';
     });
   </script>
+
+  <!-- PWA: Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+      });
+    }
+  </script>
+
 </body>
 </html>
