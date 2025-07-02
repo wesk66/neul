@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -132,7 +132,7 @@
     }
 
     #font-size-btn {
-      margin-top: 8rem;
+      margin-top: 12.5rem;
       position: relative;
     }
 
@@ -226,42 +226,12 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* Media query for landscape mode */
-    @media screen and (orientation: landscape) and (max-height: 500px) {
-      .float-buttons {
-        flex-direction: row;
-        flex-wrap: wrap;
-        height: auto;
-        width: 100%;
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0.5rem 1rem;
-        border-left: none;
-        border-top: 1px solid rgba(0,0,0,0.1);
-        background: white;
-        justify-content: center;
-        gap: 1rem;
-      }
-
-      #save-btn, #clear-btn {
-        bottom: auto;
-        top: 1rem;
-      }
-
-      #clear-confirm {
-        bottom: auto;
-        top: 5rem;
-      }
+    /* Updated font-size for highlight and italic buttons */
+    #highlight-btn,
+    #italic-btn {
+      font-size: 2.2rem;
     }
 
-    /* Allow scrolling in landscape */
-    @media screen and (orientation: landscape) {
-      html, body {
-        overflow: auto !important;
-      }
-    }
   </style>
 
   <script>
@@ -380,7 +350,7 @@
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'my-writing.txt';
+      link.download = 'neul-writing.txt';
       document.body.appendChild(link);
       link.click();
       link.remove();
