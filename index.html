@@ -84,9 +84,9 @@
       color: inherit;
     }
 
-    .float-buttons {
+     .float-buttons {
       position: fixed;
-      right: 1.1rem;
+      right: 2.1rem; /* changed from 1.1rem */
       top: 0;
       bottom: 0;
       display: flex;
@@ -100,8 +100,7 @@
       user-select: none;
       height: 100vh;
       justify-content: center;
-    }
-
+}
     .float-buttons button {
       width: 40px;
       height: 40px;
@@ -253,10 +252,10 @@
     </button>
   </div>
 
-  <button id="clear-btn">c</button>
+  <button id="clear-btn">e</button>
   <div id="clear-confirm">
-    <button id="confirm-clear">clear</button>
-    <button id="cancel-clear">do not</button>
+    <button id="confirm-clear">confirm</button>
+    <button id="cancel-clear">cancel</button>
   </div>
 
   <div id="editor" contenteditable="true" spellcheck="false"></div>
@@ -316,9 +315,9 @@
     });
 
     const sizes = [
+      { size: '1.0rem', circle: '2px' },
       { size: '1.4rem', circle: '6px' },
-      { size: '1.8rem', circle: '10px' },
-      { size: '2.2rem', circle: '14px' }
+      { size: '1.8rem', circle: '10px' }
     ];
     let currentSize = 1;
     function updateFontSize() {
@@ -371,4 +370,5 @@
   </script>
 
 </body>
+</html>
 </html>
