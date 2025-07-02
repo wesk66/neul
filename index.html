@@ -226,22 +226,25 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* Landscape warning overlay - hidden by default */
+    /* Landscape warning styling */
     #landscape-warning {
-      position: fixed;
-      inset: 0;
-      background: white;
-      color: #222;
       display: none;
-      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000cc;
+      color: white;
+      font-size: 1.4rem;
+      display: flex;
       justify-content: center;
-      font-size: 1.5rem;
-      font-family: 'Gaegu', cursive;
-      z-index: 9999;
-      padding: 1rem;
+      align-items: center;
+      z-index: 1000;
       text-align: center;
+      padding: 2rem;
+      box-sizing: border-box;
       user-select: none;
-      pointer-events: none;
     }
   </style>
 
@@ -272,10 +275,8 @@
 
   <div id="editor" contenteditable="true" spellcheck="false"></div>
 
-  <!-- Landscape orientation warning for mobile -->
-  <div id="landscape-warning">
-    Please use portrait mode.<br/>This app is best viewed in portrait orientation.
-  </div>
+  <!-- Landscape warning -->
+  <div id="landscape-warning">Please use portrait orientation for best experience.</div>
 
   <script>
     const editor = document.getElementById('editor');
@@ -287,18 +288,40 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
+    const landscapeWarning = document.getElementById('landscape-warning');
 
-    const circle = document.getElementById('circle-indicator');
-    const openingText = document.getElementById('opening-text');
+    // Mobile detection
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // DEBUG toggle - force mobile detection for desktop testing
+    const debugForceMobile = true; // <-- set to false to disable force on desktop
+
+    const effectiveIsMobile = debugForceMobile ? true : isMobile;
+
+    function checkLandscapeWarning() {
+      if (!effectiveIsMobile) {
+        landscapeWarning.style.display = 'none';
+        return;
+      }
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        landscapeWarning.style.display = 'flex';
+      } else {
+        landscapeWarning.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('load', checkLandscapeWarning);
+    window.addEventListener('resize', checkLandscapeWarning);
+    window.addEventListener('orientationchange', checkLandscapeWarning);
 
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
       setTimeout(() => {
-        openingText.style.opacity = '0';
+        document.getElementById('opening-text').style.opacity = '0';
       }, 1500);
       setTimeout(() => {
-        openingText.style.display = 'none';
+        document.getElementById('opening-text').style.display = 'none';
       }, 4000);
     });
 
@@ -340,8 +363,8 @@
     function updateFontSize() {
       const size = sizes[currentSize];
       editor.style.fontSize = size.size;
-      circle.style.width = size.circle;
-      circle.style.height = size.circle;
+      document.getElementById('circle-indicator').style.width = size.circle;
+      document.getElementById('circle-indicator').style.height = size.circle;
     }
     fontSizeBtn.addEventListener('click', () => {
       currentSize = (currentSize + 1) % sizes.length;
@@ -371,27 +394,6 @@
       link.click();
       link.remove();
     });
-  </script>
-
-  <!-- Landscape warning toggle script -->
-  <script>
-    function checkLandscapeWarning() {
-      const warning = document.getElementById('landscape-warning');
-      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-      if (isLandscape && isMobile) {
-        warning.style.display = 'flex';
-        warning.style.pointerEvents = 'all';
-      } else {
-        warning.style.display = 'none';
-        warning.style.pointerEvents = 'none';
-      }
-    }
-
-    window.addEventListener('resize', checkLandscapeWarning);
-    window.addEventListener('orientationchange', checkLandscapeWarning);
-    window.addEventListener('load', checkLandscapeWarning);
   </script>
 
   <!-- PWA: Register service worker -->
