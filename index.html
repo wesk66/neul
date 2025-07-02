@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
 
@@ -28,6 +28,13 @@
       position: relative;
       max-width: 100vw;
       max-height: 100vh;
+      -webkit-touch-callout: none;
+      -webkit-text-size-adjust: none;
+      touch-action: manipulation;
+    }
+
+    button, a, input, textarea {
+      touch-action: manipulation;
     }
 
     #opening-text {
@@ -220,6 +227,12 @@
     }
 
   </style>
+
+  <script>
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+  </script>
 </head>
 <body>
   <div id="opening-text">supports latin alphabet, & 한글</div>
