@@ -3,20 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>neul</title>
+  <title>neul with Per-Letter Fade In</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
-
-  <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
-
-  <!-- PWA: Add theme color for address bar -->
   <meta name="theme-color" content="#64b5f6" />
-
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
     }
-
     html, body {
       margin: 0;
       padding: 0;
@@ -32,11 +26,9 @@
       -webkit-text-size-adjust: none;
       touch-action: manipulation;
     }
-
     button, a, input, textarea {
       touch-action: manipulation;
     }
-
     #opening-text {
       position: fixed;
       top: 50%;
@@ -53,7 +45,6 @@
       white-space: normal;
       transition: opacity 2.5s ease-in-out;
     }
-
     #editor {
       position: absolute;
       top: 0;
@@ -83,7 +74,6 @@
       background: #dcdcdc;
       color: inherit;
     }
-
     .float-buttons {
       position: fixed;
       right: 1.1rem;
@@ -101,7 +91,6 @@
       height: 100vh;
       justify-content: center;
     }
-
     .float-buttons button {
       width: 40px;
       height: 40px;
@@ -130,12 +119,10 @@
     .float-buttons button.rotate-right {
       transform: rotate(180deg);
     }
-
     #font-size-btn {
       margin-top: 12.5rem;
       position: relative;
     }
-
     #circle-indicator {
       position: absolute;
       top: 50%;
@@ -147,7 +134,6 @@
       height: 10px;
       pointer-events: none;
     }
-
     #clear-btn {
       position: fixed;
       bottom: 2.5rem;
@@ -173,7 +159,6 @@
       transform: scale(1.05);
       border-color: #999;
     }
-
     #clear-confirm {
       position: fixed;
       bottom: 5.5rem;
@@ -203,7 +188,6 @@
       background-color: #cce4ff;
       transform: scale(1.15);
     }
-
     #save-btn {
       position: fixed;
       top: 2.5rem;
@@ -225,19 +209,17 @@
       justify-content: center;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
-
-    /* Per-letter fade-in animation */
-    @keyframes fadeInLetter {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .fade-in-letter {
+    .fade-letter {
       opacity: 0;
-      animation: fadeInLetter 1s forwards ease;
+      animation: fadeInLetter 1s forwards;
       display: inline-block;
     }
+    @keyframes fadeInLetter {
+      to {
+        opacity: 1;
+      }
+    }
   </style>
-
   <script>
     document.addEventListener('gesturestart', function (e) {
       e.preventDefault();
@@ -246,9 +228,7 @@
 </head>
 <body>
   <div id="opening-text">supports latin alphabet, & 한글</div>
-
   <button id="save-btn">s</button>
-
   <div class="float-buttons">
     <button id="highlight-btn">ㄱ</button>
     <button id="italic-btn">ㄴ</button>
@@ -256,15 +236,12 @@
       <div class="circle" id="circle-indicator"></div>
     </button>
   </div>
-
   <button id="clear-btn">c</button>
   <div id="clear-confirm">
     <button id="confirm-clear">clear</button>
     <button id="cancel-clear">do not</button>
   </div>
-
   <div id="editor" contenteditable="true" spellcheck="false"></div>
-
   <script>
     const editor = document.getElementById('editor');
     const highlightBtn = document.getElementById('highlight-btn');
@@ -275,10 +252,8 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
-
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
-
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
@@ -289,11 +264,9 @@
         openingText.style.display = 'none';
       }, 4000);
     });
-
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('saved-text', editor.innerHTML);
     });
-
     highlightBtn.addEventListener('click', () => {
       highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
@@ -307,7 +280,6 @@
       range.insertNode(span);
       selection.removeAllRanges();
     });
-
     italicBtn.addEventListener('click', () => {
       italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
@@ -318,7 +290,6 @@
       range.insertNode(em);
       selection.removeAllRanges();
     });
-
     const sizes = [
       { size: '1.4rem', circle: '6px' },
       { size: '1.8rem', circle: '10px' },
@@ -336,7 +307,6 @@
       updateFontSize();
     });
     updateFontSize();
-
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -348,7 +318,6 @@
       localStorage.removeItem('saved-text');
       clearConfirm.style.display = 'none';
     });
-
     saveBtn.addEventListener('click', () => {
       const text = editor.innerText;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -360,37 +329,66 @@
       link.remove();
     });
 
-    // --- New code for per-letter fade-in ---
-
-    editor.addEventListener('beforeinput', (event) => {
-      if (event.inputType === 'insertText' && event.data) {
-        event.preventDefault();
-
-        const sel = window.getSelection();
-        if (!sel.rangeCount) return;
-        const range = sel.getRangeAt(0);
-
-        // Create a span with fade-in class wrapping the typed character
-        const span = document.createElement('span');
-        span.className = 'fade-in-letter';
-        span.textContent = event.data;
-
-        // Insert the span at the current caret position
-        range.deleteContents();
-        range.insertNode(span);
-
-        // Move caret right after the newly inserted span
-        range.setStartAfter(span);
-        range.collapse(true);
-
-        // Update selection to the new caret position
-        sel.removeAllRanges();
-        sel.addRange(range);
+    let isComposing = false;
+    editor.addEventListener('compositionstart', () => {
+      isComposing = true;
+    });
+    editor.addEventListener('compositionend', () => {
+      isComposing = false;
+      processNewLetters();
+    });
+    editor.addEventListener('input', (e) => {
+      if (!isComposing) {
+        processNewLetters();
       }
     });
-  </script>
 
-  <!-- PWA: Register service worker -->
+    function processNewLetters() {
+      let selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      let range = selection.getRangeAt(0).cloneRange();
+      let container = editor;
+
+      let nodes = Array.from(container.childNodes);
+      nodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          let newNode = document.createDocumentFragment();
+          let text = node.textContent;
+          let lastProcessed = 0;
+          for (let i = 0; i < text.length; i++) {
+            let char = text[i];
+            if (char === '\n' || char === '\r') {
+              newNode.appendChild(document.createTextNode(char));
+              lastProcessed = i + 1;
+              continue;
+            }
+            let span = document.createElement('span');
+            span.textContent = char;
+            span.classList.add('fade-letter');
+            newNode.appendChild(span);
+            lastProcessed = i + 1;
+          }
+          if (lastProcessed < text.length) {
+            newNode.appendChild(document.createTextNode(text.slice(lastProcessed)));
+          }
+          container.replaceChild(newNode, node);
+        }
+      });
+      restoreCaret(selection);
+    }
+
+    function restoreCaret(selection) {
+      let lastSpan = editor.querySelector('span.fade-letter:last-child');
+      if (lastSpan) {
+        let range = document.createRange();
+        range.setStartAfter(lastSpan);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
