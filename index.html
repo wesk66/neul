@@ -77,7 +77,6 @@
       color: inherit;
     }
 
-    /* Float buttons container with subtle vertical grey line on left side */
     .float-buttons {
       position: fixed;
       right: 1.1rem;
@@ -257,7 +256,6 @@
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
-    // On page load, restore saved text if available
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
@@ -269,12 +267,10 @@
       }, 4000);
     });
 
-    // Save editor content on unload
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('saved-text', editor.innerHTML);
     });
 
-    // Highlight button toggles background color for selected text
     highlightBtn.addEventListener('click', () => {
       highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
@@ -289,7 +285,6 @@
       selection.removeAllRanges();
     });
 
-    // Italic button toggles emphasis tag for selected text
     italicBtn.addEventListener('click', () => {
       italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
@@ -301,7 +296,6 @@
       selection.removeAllRanges();
     });
 
-    // Font sizes and circle indicator sizes
     const sizes = [
       { size: '1.4rem', circle: '6px' },
       { size: '1.8rem', circle: '10px' },
@@ -320,7 +314,6 @@
     });
     updateFontSize();
 
-    // Clear text confirmation popup
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -333,7 +326,6 @@
       clearConfirm.style.display = 'none';
     });
 
-    // Save text download
     saveBtn.addEventListener('click', () => {
       const text = editor.innerText;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
