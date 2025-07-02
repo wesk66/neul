@@ -84,6 +84,17 @@
       color: inherit;
     }
 
+    /* Fade-in animation for new letters */
+    @keyframes fadeInLetter {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .fade-in-letter {
+      animation: fadeInLetter 1s ease forwards;
+      display: inline-block;
+    }
+
     .float-buttons {
       position: fixed;
       right: 1.1rem;
@@ -265,7 +276,6 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
-
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
@@ -349,6 +359,80 @@
       link.click();
       link.remove();
     });
+
+    // --- New fade-in letter effect ---
+
+    // Helper: debounce to avoid excessive calls
+    function debounce(func, wait) {
+      let timeout;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    // On input, wrap newly inserted letters in fade-in spans
+    editor.addEventListener('input', debounce(() => {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) return; // Only when caret, no selection
+
+      // We'll process the editor's text nodes, wrap single letters that are not already wrapped in span.fade-in-letter
+
+      // Function to recursively walk text nodes and wrap new letters
+      function wrapNewLetters(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const parent = node.parentNode;
+          if (parent && parent.classList && parent.classList.contains('fade-in-letter')) {
+            // Already wrapped, skip
+            return;
+          }
+          const text = node.textContent;
+          if (!text) return;
+          const frag = document.createDocumentFragment();
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            // Create span with fade-in only for visible characters (ignore spaces if you want)
+            if (char.trim()) {
+              const span = document.createElement('span');
+              span.className = 'fade-in-letter';
+              span.textContent = char;
+              frag.appendChild(span);
+            } else {
+              frag.appendChild(document.createTextNode(char));
+            }
+          }
+          parent.replaceChild(frag, node);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          for (let i = node.childNodes.length - 1; i >= 0; i--) {
+            wrapNewLetters(node.childNodes[i]);
+          }
+        }
+      }
+
+      wrapNewLetters(editor);
+
+      // Restore caret position after DOM changes
+      // We'll place caret at the end of editor for simplicity
+      const lastTextNode = (function getLastTextNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node;
+        for (let i = node.childNodes.length -1; i >= 0; i--) {
+          const found = getLastTextNode(node.childNodes[i]);
+          if (found) return found;
+        }
+        return null;
+      })(editor);
+
+      if (lastTextNode) {
+        const newRange = document.createRange();
+        newRange.setStart(lastTextNode, lastTextNode.textContent.length);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+    }, 50));
+
   </script>
 
   <!-- PWA: Register service worker -->
