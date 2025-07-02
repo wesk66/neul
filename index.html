@@ -226,30 +226,27 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* ========================= */
-    /* Orientation Lock Additions */
-    /* ========================= */
-    @media screen and (orientation: landscape) {
-      body::before {
-        content: "please rotate your device to portrait mode";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: white;
-        color: black;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        z-index: 9999;
-        text-align: center;
-        padding: 2rem;
-      }
+    /* Landscape warning overlay */
+    #landscape-warning {
+      position: fixed;
+      inset: 0;
+      background: white;
+      color: #222;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-family: 'Gaegu', cursive;
+      z-index: 9999;
+      padding: 1rem;
+      text-align: center;
+      user-select: none;
+      pointer-events: all;
+    }
 
-      body > * {
-        display: none !important;
+    @media (orientation: landscape) and (max-width: 768px) {
+      #landscape-warning {
+        display: flex;
       }
     }
   </style>
@@ -259,14 +256,14 @@
       e.preventDefault();
     });
 
-    // =========================
-    // Orientation Lock Additions
-    // =========================
-    if (screen.orientation && screen.orientation.lock) {
-      screen.orientation.lock('portrait').catch(function(error) {
-        console.warn('Orientation lock failed:', error);
-      });
+    // Lock orientation if possible
+    function lockOrientation() {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait-primary').catch(() => {});
+      }
     }
+    window.addEventListener('load', lockOrientation);
+    window.addEventListener('orientationchange', lockOrientation);
   </script>
 </head>
 <body>
@@ -289,6 +286,11 @@
   </div>
 
   <div id="editor" contenteditable="true" spellcheck="false"></div>
+
+  <!-- Landscape orientation warning -->
+  <div id="landscape-warning">
+    Please rotate your device to portrait mode for the best experience.
+  </div>
 
   <script>
     const editor = document.getElementById('editor');
@@ -347,27 +349,26 @@
     const sizes = [
       { size: '1.4rem', circle: '6px' },
       { size: '1.8rem', circle: '10px' },
-      { size: '2.2rem', circle: '14px' }
+      { size: '2.2rem', circle: '14px' },
+      { size: '2.6rem', circle: '18px' }
     ];
-    let currentSize = 1;
-    function updateFontSize() {
-      const size = sizes[currentSize];
-      editor.style.fontSize = size.size;
-      circle.style.width = size.circle;
-      circle.style.height = size.circle;
-    }
+    let sizeIndex = 1;
+
     fontSizeBtn.addEventListener('click', () => {
-      currentSize = (currentSize + 1) % sizes.length;
-      updateFontSize();
+      sizeIndex = (sizeIndex + 1) % sizes.length;
+      editor.style.fontSize = sizes[sizeIndex].size;
+      circle.style.width = sizes[sizeIndex].circle;
+      circle.style.height = sizes[sizeIndex].circle;
     });
-    updateFontSize();
 
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
+
     cancelClear.addEventListener('click', () => {
       clearConfirm.style.display = 'none';
     });
+
     confirmClear.addEventListener('click', () => {
       editor.innerHTML = '';
       localStorage.removeItem('saved-text');
@@ -375,29 +376,13 @@
     });
 
     saveBtn.addEventListener('click', () => {
-      const text = editor.innerText;
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'neul-download.txt';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      const blob = new Blob([editor.innerText], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.download = 'neul.txt';
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      URL.revokeObjectURL(a.href);
     });
   </script>
-
-  <!-- PWA: Register service worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        }).catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-      });
-    }
-  </script>
-
 </body>
 </html>
