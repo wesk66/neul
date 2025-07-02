@@ -271,13 +271,13 @@
   </script>
 </head>
 <body>
-  <div id="opening-text">supports latin alphabet, & 한글</div>
+  <div id="opening-text">vertical orientation suggested</div>
 
   <button id="save-btn">s</button>
 
   <div class="float-buttons">
-    <button id="highlight-btn">ㄱ</button>
-    <button id="italic-btn">ㄴ</button>
+    <button id="highlight-btn">ㅐ</button>
+    <button id="italic-btn">i</button>
     <button id="font-size-btn">
       <div class="circle" id="circle-indicator"></div>
     </button>
@@ -380,7 +380,7 @@
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'neul-download.txt';
+      link.download = 'my-writing.txt';
       document.body.appendChild(link);
       link.click();
       link.remove();
