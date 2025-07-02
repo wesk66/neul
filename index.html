@@ -226,27 +226,49 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* Landscape warning styling */
-    #landscape-warning {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000000cc;
-      color: white;
-      font-size: 1.4rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      text-align: center;
-      padding: 2rem;
-      box-sizing: border-box;
-      user-select: none;
+    /* Media query for landscape mode */
+    @media screen and (orientation: landscape) and (max-height: 500px) {
+      .float-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        height: auto;
+        width: 100%;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.5rem 1rem;
+        border-left: none;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        background: white;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      #save-btn, #clear-btn {
+        bottom: auto;
+        top: 1rem;
+      }
+
+      #clear-confirm {
+        bottom: auto;
+        top: 5rem;
+      }
+    }
+
+    /* Allow scrolling in landscape */
+    @media screen and (orientation: landscape) {
+      html, body {
+        overflow: auto !important;
+      }
     }
   </style>
+
+  <script>
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+  </script>
 </head>
 <body>
   <div id="opening-text">supports latin alphabet, & 한글</div>
@@ -269,30 +291,113 @@
 
   <div id="editor" contenteditable="true" spellcheck="false"></div>
 
-  <!-- Landscape warning -->
-  <div id="landscape-warning">
-    <p>Please rotate your device back to portrait mode to continue.</p>
-  </div>
-
   <script>
-    const landscapeWarning = document.getElementById('landscape-warning');
+    const editor = document.getElementById('editor');
+    const highlightBtn = document.getElementById('highlight-btn');
+    const italicBtn = document.getElementById('italic-btn');
+    const fontSizeBtn = document.getElementById('font-size-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const clearConfirm = document.getElementById('clear-confirm');
+    const confirmClear = document.getElementById('confirm-clear');
+    const cancelClear = document.getElementById('cancel-clear');
+    const saveBtn = document.getElementById('save-btn');
 
-    function checkOrientation() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+    const circle = document.getElementById('circle-indicator');
+    const openingText = document.getElementById('opening-text');
 
-      if (width > height && width < 1024) {
-        landscapeWarning.style.display = 'flex';
-      } else {
-        landscapeWarning.style.display = 'none';
-      }
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('saved-text');
+      if (saved) editor.innerHTML = saved;
+      setTimeout(() => {
+        openingText.style.opacity = '0';
+      }, 1500);
+      setTimeout(() => {
+        openingText.style.display = 'none';
+      }, 4000);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('saved-text', editor.innerHTML);
+    });
+
+    highlightBtn.addEventListener('click', () => {
+      highlightBtn.classList.toggle('rotate-left');
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.backgroundColor = '#64b5f6';
+      span.style.lineHeight = '1.4';
+      span.style.display = 'inline';
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      selection.removeAllRanges();
+    });
+
+    italicBtn.addEventListener('click', () => {
+      italicBtn.classList.toggle('rotate-right');
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const em = document.createElement('em');
+      em.appendChild(range.extractContents());
+      range.insertNode(em);
+      selection.removeAllRanges();
+    });
+
+    const sizes = [
+      { size: '1.4rem', circle: '6px' },
+      { size: '1.8rem', circle: '10px' },
+      { size: '2.2rem', circle: '14px' }
+    ];
+    let currentSize = 1;
+    function updateFontSize() {
+      const size = sizes[currentSize];
+      editor.style.fontSize = size.size;
+      circle.style.width = size.circle;
+      circle.style.height = size.circle;
     }
+    fontSizeBtn.addEventListener('click', () => {
+      currentSize = (currentSize + 1) % sizes.length;
+      updateFontSize();
+    });
+    updateFontSize();
 
-    // Initial check
-    checkOrientation();
+    clearBtn.addEventListener('click', () => {
+      clearConfirm.style.display = 'block';
+    });
+    cancelClear.addEventListener('click', () => {
+      clearConfirm.style.display = 'none';
+    });
+    confirmClear.addEventListener('click', () => {
+      editor.innerHTML = '';
+      localStorage.removeItem('saved-text');
+      clearConfirm.style.display = 'none';
+    });
 
-    // Listen for resize events
-    window.addEventListener('resize', checkOrientation);
+    saveBtn.addEventListener('click', () => {
+      const text = editor.innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'neul-download.txt';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+  </script>
+
+  <!-- PWA: Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+      });
+    }
   </script>
 
 </body>
