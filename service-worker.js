@@ -1,4 +1,4 @@
-const CACHE_NAME = 'geul-cache-v1';
+const CACHE_NAME = 'neul-cache-v1';
 const FILES_TO_CACHE = [
   './',
   './index.html',
