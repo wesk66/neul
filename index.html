@@ -2,323 +2,224 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>neul늘</title>
+  
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Sunflower&display=swap" rel="stylesheet" />
-  
-  <!-- PWA: Add manifest -->
-  <link rel="manifest" href="/manifest.json" />
-
-  <!-- PWA: Add theme color for address bar -->
-  <meta name="theme-color" content="#64b5f6" />
 
   <style>
+    /* Global styles */
     *, *::before, *::after {
       box-sizing: border-box;
     }
 
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
       font-family: 'Gaegu', cursive;
       background: white;
+      height: 100vh;
       overflow: hidden;
       position: relative;
-      max-width: 100vw;
-      max-height: 100vh;
-      -webkit-touch-callout: none;
-      -webkit-text-size-adjust: none;
-      touch-action: manipulation;
-    }
-
-    button, a, input, textarea {
-      touch-action: manipulation;
-    }
-
-    #opening-text {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: clamp(1.4rem, 3.5vw, 2rem);
-      color: #222;
-      opacity: 1;
-      pointer-events: none;
-      user-select: none;
-      z-index: 10;
-      max-width: 90vw;
-      text-align: center;
-      white-space: normal;
-      transition: opacity 2.5s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     #editor {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      padding: 2.5rem 7rem 0.5rem 1rem;
+      width: 80%;
+      height: 70%;
+      padding: 20px;
+      border: 1px solid #ccc;
       font-size: 1.8rem;
-      color: #222;
-      background: transparent;
+      background-color: #f9f9f9;
       white-space: pre-wrap;
       word-break: break-word;
       outline: none;
-      overflow-y: auto;
-      overflow-x: hidden;
-      max-width: 100vw;
-      max-height: 100vh;
       font-family: 'Gaegu', cursive;
-      line-height: 1.4;
-      user-select: text;
-    }
-
-    #editor * {
-      font-family: 'Gaegu', cursive !important;
-      font-size: inherit !important;
-    }
-
-    ::selection {
-      background: #dcdcdc;
-      color: inherit;
+      overflow-y: auto;
     }
 
     .float-buttons {
       position: fixed;
-      right: 1.1rem;
-      top: 0;
-      bottom: 0;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      align-items: center;
       gap: 1.5rem;
-      z-index: 15;
-      padding-left: 0.6rem;
-      border-left: 1px solid rgba(0,0,0,0.1);
-      background: transparent;
-      user-select: none;
-      height: 100vh;
-      justify-content: center;
+      z-index: 10;
     }
 
     .float-buttons button {
       width: 40px;
       height: 40px;
-      font-family: 'Gaegu', cursive;
-      font-size: 1.5rem;
-      border: 1.5px solid #ccc;
-      background: white;
-      color: #222;
       border-radius: 8px;
+      font-size: 1.5rem;
+      background: white;
+      border: 1.5px solid #ccc;
       cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.3s ease;
-      position: relative;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 0;
-      line-height: 1;
+      align-items: center;
+      transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
     .float-buttons button:hover {
-      transform: scale(1.05);
+      transform: scale(1.1);
       border-color: #999;
     }
 
-    #clear-btn {
+    #font-dropdown {
+      display: none;
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      z-index: 5;
+      padding: 5px;
+      width: 200px;
+    }
+
+    #font-dropdown div {
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    #font-dropdown div:hover {
+      background-color: #f1f1f1;
+    }
+
+    #clear-btn, #save-btn, #undo-btn {
       position: fixed;
-      bottom: 2.5rem;
+      bottom: 1rem;
       right: 1rem;
-      z-index: 20;
       width: 40px;
       height: 40px;
       font-family: 'Gaegu', cursive;
       font-size: 1.3rem;
-      border: 1.5px solid #ccc;
       background: white;
-      color: #222;
-      border-radius: 8px;
+      border: 1.5px solid #ccc;
       cursor: pointer;
       display: flex;
-      align-items: center;
       justify-content: center;
-      line-height: 1;
-      padding: 0;
+      align-items: center;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    #clear-btn:hover {
-      transform: scale(1.05);
+    #clear-btn:hover, #save-btn:hover, #undo-btn:hover {
+      transform: scale(1.1);
       border-color: #999;
     }
 
     #clear-confirm {
       position: fixed;
-      bottom: 5.5rem;
+      bottom: 5rem;
       right: 1rem;
       background: #eee;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem;
       border-radius: 5px;
       border: 1px solid #ccc;
       display: none;
-      font-family: 'Gaegu', cursive;
-      z-index: 19;
-      user-select: none;
     }
 
     #clear-confirm button {
-      margin: 0 0.3rem;
+      margin: 0.3rem;
+      padding: 0.5rem;
       font-family: 'Gaegu', cursive;
-      font-size: 1.1rem;
-      background: white;
-      border: 1px solid #999;
-      border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.15s ease;
-      color: black !important;
-      user-select: none;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
     }
 
     #clear-confirm button:hover {
-      background-color: #cce4ff;
-      transform: scale(1.15);
-    }
-
-    #save-btn {
-      position: fixed;
-      top: 2.5rem;
-      right: 1rem;
-      z-index: 20;
-      width: 40px;
-      height: 40px;
-      font-family: 'Gaegu', cursive;
-      font-size: 1.3rem;
-      line-height: 1;
-      padding: 0;
-      border-radius: 8px;
-      cursor: pointer;
-      background: white;
-      border: 1.5px solid #ccc;
-      color: #222;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s ease, border-color 0.3s ease;
-    }
-
-    /* Font Dropdown Styles */
-    #font-dropdown {
-      display: none;
-      position: absolute;
-      top: 50px;
-      right: 0;
-      width: 180px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1rem;
-      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
-      z-index: 10;
-    }
-
-    #font-dropdown div {
-      cursor: pointer;
-      padding: 5px 0;
-      font-size: 1.2rem;
-    }
-
-    #font-dropdown div:hover {
-      background: #f0f0f0;
+      background-color: #ddd;
     }
 
   </style>
+</head>
+<body>
+  <!-- Editor Content -->
+  <div id="editor" contenteditable="true">Hello, start typing here...</div>
+
+  <!-- Button Bar -->
+  <div class="float-buttons">
+    <button id="highlight-btn">H</button>
+    <button id="italic-btn">I</button>
+    <button id="font-btn">F</button>
+  </div>
+
+  <!-- Font Dropdown -->
+  <div id="font-dropdown">
+    <div style="font-family: 'Gaegu', cursive;">Gaegu</div>
+    <div style="font-family: 'Sunflower', sans-serif;">Sunflower</div>
+  </div>
+
+  <!-- Clear Button -->
+  <button id="clear-btn">E</button>
+  <div id="clear-confirm">
+    <button id="confirm-clear">Confirm</button>
+    <button id="cancel-clear">Cancel</button>
+  </div>
+
+  <!-- Save Button -->
+  <button id="save-btn">S</button>
+
+  <!-- Undo Button -->
+  <button id="undo-btn">R</button>
 
   <script>
-    const editor = document.getElementById('editor');
+    // References to buttons
     const highlightBtn = document.getElementById('highlight-btn');
     const italicBtn = document.getElementById('italic-btn');
-    const fontSizeBtn = document.getElementById('font-size-btn');
+    const fontBtn = document.getElementById('font-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const editor = document.getElementById('editor');
     const clearConfirm = document.getElementById('clear-confirm');
+    const fontDropdown = document.getElementById('font-dropdown');
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
-    const saveBtn = document.getElementById('save-btn');
-    const undoBtn = document.getElementById('undoBtn');
-    const fontToggleBtn = document.getElementById('fontToggleBtn');
-    const fontDropdown = document.getElementById('font-dropdown');
-    const openingText = document.getElementById('opening-text');
-
-    const fontMap = {
-      'Chiron Hei HK 조원흑체': "'Chiron Hei HK', serif",
-      'Nanum Myeongjo 나눔명조': "'Nanum Myeongjo', serif",
-      'Sunflower': "'Sunflower', sans-serif",
-      'Gaegu': "'Gaegu', cursive"
-    };
-
+    
+    // Undo stack
     let undoStack = [];
     let ignoreUndoPush = false;
 
+    // Function to save state for undo
     function pushUndoState() {
-      if (ignoreUndoPush) return;
-      if (undoStack.length > 50) undoStack.shift();
-      undoStack.push(editor.innerHTML);
-    }
-
-    window.addEventListener('load', () => {
-      const saved = localStorage.getItem('saved-text');
-      if (saved) {
-        editor.innerHTML = saved;
+      if (!ignoreUndoPush) {
+        undoStack.push(editor.innerHTML);
       }
-      pushUndoState();
-
-      setTimeout(() => {
-        openingText.style.opacity = '0';
-      }, 1500);
-      setTimeout(() => {
-        openingText.style.display = 'none';
-      }, 4000);
-    });
-
-    window.addEventListener('beforeunload', () => {
-      localStorage.setItem('saved-text', editor.innerHTML);
-    });
-
-    fontSizeBtn.addEventListener('click', () => {
-      fontDropdown.style.display = fontDropdown.style.display === 'block' ? 'none' : 'block';
-    });
-
-    function changeFont(font) {
-      editor.style.fontFamily = fontMap[font];
-      fontDropdown.style.display = 'none';
     }
 
-    document.querySelectorAll('#font-dropdown div').forEach(div => {
-      div.addEventListener('click', () => {
-        changeFont(div.innerText);
-      });
+    // Undo functionality
+    undoBtn.addEventListener('click', () => {
+      if (undoStack.length === 0) return;
+      ignoreUndoPush = true;
+      editor.innerHTML = undoStack.pop();
+      ignoreUndoPush = false;
     });
 
+    // Highlight functionality
     highlightBtn.addEventListener('click', () => {
-      highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
       if (!selection.rangeCount || selection.isCollapsed) return;
       const range = selection.getRangeAt(0);
       const span = document.createElement('span');
       span.style.backgroundColor = '#64b5f6';
-      span.style.lineHeight = '1.4';
-      span.style.display = 'inline';
       span.appendChild(range.extractContents());
       range.insertNode(span);
       selection.removeAllRanges();
       pushUndoState();
     });
 
+    // Italic functionality
     italicBtn.addEventListener('click', () => {
-      italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
       if (!selection.rangeCount || selection.isCollapsed) return;
       const range = selection.getRangeAt(0);
@@ -329,14 +230,19 @@
       pushUndoState();
     });
 
-    // Functionality for undo
-    undoBtn.addEventListener('click', () => {
-      if (undoStack.length === 0) return;
-      ignoreUndoPush = true;
-      editor.innerHTML = undoStack.pop();
-      ignoreUndoPush = false;
+    // Font selection functionality
+    fontBtn.addEventListener('click', () => {
+      fontDropdown.style.display = fontDropdown.style.display === 'block' ? 'none' : 'block';
     });
 
+    document.querySelectorAll('#font-dropdown div').forEach(div => {
+      div.addEventListener('click', () => {
+        editor.style.fontFamily = div.style.fontFamily;
+        fontDropdown.style.display = 'none';
+      });
+    });
+
+    // Clear functionality
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -352,6 +258,7 @@
       pushUndoState();
     });
 
+    // Save functionality
     saveBtn.addEventListener('click', () => {
       const text = editor.innerText;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
@@ -361,6 +268,17 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
+    });
+
+    // Initial setup (load saved text)
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('saved-text');
+      if (saved) editor.innerHTML = saved;
+    });
+
+    // Save to local storage on unload
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('saved-text', editor.innerHTML);
     });
   </script>
 
