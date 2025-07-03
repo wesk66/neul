@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul늘</title>
+
+  <!-- Fonts: Original + Added Nanum Myeongjo for Hangul support -->
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Nanum+Myeongjo&display=swap" rel="stylesheet" />
 
   <!-- PWA: Add manifest -->
@@ -226,7 +228,6 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* Updated font-size for highlight and italic buttons */
     #highlight-btn,
     #italic-btn {
       font-size: 1.8rem;
@@ -251,8 +252,8 @@
     <button id="font-size-btn">
       <div class="circle" id="circle-indicator"></div>
     </button>
-    <!-- Removed "r" button -->
-    <!-- Removed "f" button -->
+    <!-- Added font toggle button -->
+    <button id="font-toggle-btn">F</button>
   </div>
 
   <button id="clear-btn">e</button>
@@ -276,8 +277,6 @@
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
-    let lastValidContent = '';  // To store content before accidental erase
-
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
@@ -293,7 +292,6 @@
       localStorage.setItem('saved-text', editor.innerHTML);
     });
 
-    // Highlight
     highlightBtn.addEventListener('click', () => {
       highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
@@ -308,7 +306,6 @@
       selection.removeAllRanges();
     });
 
-    // Italic
     italicBtn.addEventListener('click', () => {
       italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
@@ -320,7 +317,6 @@
       selection.removeAllRanges();
     });
 
-    // Font size toggle
     const sizes = [
       { size: '1.0rem', circle: '2px' },
       { size: '1.4rem', circle: '6px' },
@@ -339,7 +335,6 @@
     });
     updateFontSize();
 
-    // Clear
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -350,7 +345,6 @@
       editor.innerHTML = '';
       localStorage.removeItem('saved-text');
       clearConfirm.style.display = 'none';
-      lastValidContent = '';  // Disable restoration after clear
     });
 
     saveBtn.addEventListener('click', () => {
@@ -362,6 +356,18 @@
       document.body.appendChild(link);
       link.click();
       link.remove();
+    });
+
+    // Font toggle logic
+    const fontToggleBtn = document.getElementById('font-toggle-btn');
+    let isAltFont = false;
+    fontToggleBtn.addEventListener('click', () => {
+      isAltFont = !isAltFont;
+      const newFont = isAltFont ? "'Nanum Myeongjo', serif" : "'Gaegu', cursive";
+      editor.style.fontFamily = newFont;
+      editor.querySelectorAll('*').forEach(el => {
+        el.style.fontFamily = newFont;
+      });
     });
   </script>
 
