@@ -5,10 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul늘</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
+
+  <!-- webfont imports -->
   <link rel="stylesheet" href="https://unpkg.com/chiron-hei-hk-webfont/css/vf.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/nanummyeongjo.css">
   <link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&family=Diphylleia&display=swap" rel="stylesheet">
+
+  <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
+
+  <!-- PWA: Add theme color for address bar -->
   <meta name="theme-color" content="#64b5f6" />
 
   <style>
@@ -74,12 +80,10 @@
       line-height: 1.4;
       user-select: text;
     }
-
     #editor * {
-      font-family: inherit !important;
+      font-family: 'Gaegu', cursive !important;
       font-size: inherit !important;
     }
-
     ::selection {
       background: #dcdcdc;
       color: inherit;
@@ -121,10 +125,15 @@
       padding: 0;
       line-height: 1;
     }
-
     .float-buttons button:hover {
       transform: scale(1.05);
       border-color: #999;
+    }
+    .float-buttons button.rotate-left {
+      transform: rotate(-180deg);
+    }
+    .float-buttons button.rotate-right {
+      transform: rotate(180deg);
     }
 
     #font-size-btn {
@@ -165,7 +174,6 @@
       padding: 0;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
-
     #clear-btn:hover {
       transform: scale(1.05);
       border-color: #999;
@@ -184,7 +192,6 @@
       z-index: 19;
       user-select: none;
     }
-
     #clear-confirm button {
       margin: 0 0.3rem;
       font-family: 'Gaegu', cursive;
@@ -197,7 +204,6 @@
       color: black !important;
       user-select: none;
     }
-
     #clear-confirm button:hover {
       background-color: #cce4ff;
       transform: scale(1.15);
@@ -225,11 +231,16 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
+    /* updated font-size for highlight and italic buttons */
+    #highlight-btn,
+    #italic-btn {
+      font-size: 1.8rem;
+    }
+
     .font-selector {
       position: relative;
       display: inline-block;
     }
-
     .font-dropdown {
       display: none;
       position: absolute;
@@ -238,13 +249,11 @@
       z-index: 100;
       width: max-content;
     }
-
     .font-dropdown div {
       padding: 5px 10px;
       cursor: pointer;
       font-family: Gaegu, sans-serif;
     }
-
     .font-selector.show .font-dropdown { display: block; }
   </style>
 </head>
@@ -266,25 +275,77 @@
     <!-- font button (labeled "f") -->
     <button id="fontToggleBtn" class="font-btn">f</button>
     <div class="font-dropdown">
-      <!-- font choices displayed in their respective fonts -->
-      <div style="font-family: 'Chiron Hei HK';">Chiron Hei HK 조원흑체</div>
-      <div style="font-family: 'Nanum Myeongjo', serif;">Nanum Myeongjo 나눔명조</div>
-      <div style="font-family: 'Yeon Sung', cursive;">Yeon Sung 연성</div>
-      <div style="font-family: 'Diphylleia', serif;">Diphylleia</div>
-      <div style="font-family: 'Gaegu', cursive;">Gaegu</div>
+      <!-- font choices displayed in their own div elements -->
+      <div id="fontChoice1">font1</div>
+      <div id="fontChoice2">font2</div>
+      <div id="fontChoice3">font3</div>
     </div>
   </div>
 
-  <button id="clear-btn">e</button>
+  <div id="editor" contenteditable="true"></div>
+
+  <!-- clear confirmation -->
   <div id="clear-confirm">
-    <button id="clear-confirm-yes">yes</button>
-    <button id="clear-confirm-no">no</button>
+    <button id="clear-yes">Yes</button>
+    <button id="clear-no">No</button>
   </div>
 
-  <div id="editor" contenteditable="true" spellcheck="false"></div>
-
+  <!-- JS code -->
   <script>
-    // JavaScript to handle font selection, saving, clearing, and other functionality
+    document.getElementById('highlight-btn').addEventListener('click', function() {
+      document.execCommand('backColor', false, 'yellow');
+    });
+
+    document.getElementById('italic-btn').addEventListener('click', function() {
+      document.execCommand('italic');
+    });
+
+    document.getElementById('save-btn').addEventListener('click', function() {
+      const textToSave = document.getElementById('editor').innerText;
+      const blob = new Blob([textToSave], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'textfile.txt';
+      link.click();
+    });
+
+    // Font size functionality
+    document.getElementById('font-size-btn').addEventListener('click', function() {
+      const editor = document.getElementById('editor');
+      editor.style.fontSize = (parseInt(window.getComputedStyle(editor).fontSize) + 2) + 'px';
+    });
+
+    // Undo button functionality
+    document.getElementById('undoBtn').addEventListener('click', function() {
+      document.execCommand('undo');
+    });
+
+    // Font toggle functionality
+    const fontToggleBtn = document.getElementById('fontToggleBtn');
+    const fontDropdown = document.querySelector('.font-dropdown');
+    fontToggleBtn.addEventListener('click', function() {
+      fontDropdown.classList.toggle('show');
+    });
+
+    // Clear button and confirmation logic
+    const clearBtn = document.getElementById('clear-btn');
+    const clearConfirm = document.getElementById('clear-confirm');
+    const editor = document.getElementById('editor');
+    const clearYes = document.getElementById('clear-yes');
+    const clearNo = document.getElementById('clear-no');
+    
+    clearBtn.addEventListener('click', function() {
+      clearConfirm.style.display = 'block';
+    });
+
+    clearYes.addEventListener('click', function() {
+      editor.innerHTML = '';
+      clearConfirm.style.display = 'none';
+    });
+
+    clearNo.addEventListener('click', function() {
+      clearConfirm.style.display = 'none';
+    });
   </script>
 </body>
 </html>
