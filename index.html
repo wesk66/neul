@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul늘</title>
-  <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Nanum+Myeongjo&display=swap" rel="stylesheet" />
 
   <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
@@ -75,9 +75,13 @@
       line-height: 1.4;
       user-select: text;
     }
-
-    #highlight-btn, #italic-btn, #font-size-btn, #clear-btn, #save-btn {
-      font-family: 'Gaegu', cursive;
+    #editor * {
+      font-family: 'Gaegu', cursive !important;
+      font-size: inherit !important;
+    }
+    ::selection {
+      background: #dcdcdc;
+      color: inherit;
     }
 
     .float-buttons {
@@ -101,6 +105,7 @@
     .float-buttons button {
       width: 40px;
       height: 40px;
+      font-family: 'Gaegu', cursive;
       font-size: 1.5rem;
       border: 1.5px solid #ccc;
       background: white;
@@ -115,6 +120,33 @@
       padding: 0;
       line-height: 1;
     }
+    .float-buttons button:hover {
+      transform: scale(1.05);
+      border-color: #999;
+    }
+    .float-buttons button.rotate-left {
+      transform: rotate(-180deg);
+    }
+    .float-buttons button.rotate-right {
+      transform: rotate(180deg);
+    }
+
+    #font-size-btn {
+      margin-top: 12.5rem;
+      position: relative;
+    }
+
+    #circle-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid #222;
+      border-radius: 50%;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+    }
 
     #clear-btn {
       position: fixed;
@@ -123,6 +155,7 @@
       z-index: 20;
       width: 40px;
       height: 40px;
+      font-family: 'Gaegu', cursive;
       font-size: 1.3rem;
       border: 1.5px solid #ccc;
       background: white;
@@ -135,6 +168,10 @@
       line-height: 1;
       padding: 0;
       transition: transform 0.2s ease, border-color 0.3s ease;
+    }
+    #clear-btn:hover {
+      transform: scale(1.05);
+      border-color: #999;
     }
 
     #clear-confirm {
@@ -150,6 +187,22 @@
       z-index: 19;
       user-select: none;
     }
+    #clear-confirm button {
+      margin: 0 0.3rem;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.1rem;
+      background: white;
+      border: 1px solid #999;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      color: black !important;
+      user-select: none;
+    }
+    #clear-confirm button:hover {
+      background-color: #cce4ff;
+      transform: scale(1.15);
+    }
 
     #save-btn {
       position: fixed;
@@ -158,6 +211,7 @@
       z-index: 20;
       width: 40px;
       height: 40px;
+      font-family: 'Gaegu', cursive;
       font-size: 1.3rem;
       line-height: 1;
       padding: 0;
@@ -173,13 +227,22 @@
     }
 
     /* Updated font-size for highlight and italic buttons */
-    #highlight-btn, #italic-btn {
+    #highlight-btn,
+    #italic-btn {
       font-size: 1.8rem;
     }
+
   </style>
+
+  <script>
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+  </script>
 </head>
 <body>
   <div id="opening-text">vertical orientation suggested</div>
+
   <button id="save-btn">s</button>
 
   <div class="float-buttons">
@@ -188,6 +251,10 @@
     <button id="font-size-btn">
       <div class="circle" id="circle-indicator"></div>
     </button>
+    <!-- New "r" button -->
+    <button id="restore-btn">r</button>
+    <!-- New "f" button -->
+    <button id="font-toggle-btn">f</button>
   </div>
 
   <button id="clear-btn">e</button>
@@ -208,8 +275,12 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
+    const restoreBtn = document.getElementById('restore-btn');  // Restore button
+    const fontToggleBtn = document.getElementById('font-toggle-btn');  // Font toggle button
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
+
+    let lastValidContent = '';  // To store content before accidental erase
 
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
@@ -226,6 +297,7 @@
       localStorage.setItem('saved-text', editor.innerHTML);
     });
 
+    // Highlight
     highlightBtn.addEventListener('click', () => {
       highlightBtn.classList.toggle('rotate-left');
       const selection = window.getSelection();
@@ -240,6 +312,7 @@
       selection.removeAllRanges();
     });
 
+    // Italic
     italicBtn.addEventListener('click', () => {
       italicBtn.classList.toggle('rotate-right');
       const selection = window.getSelection();
@@ -251,6 +324,7 @@
       selection.removeAllRanges();
     });
 
+    // Font size toggle
     const sizes = [
       { size: '1.0rem', circle: '2px' },
       { size: '1.4rem', circle: '6px' },
@@ -269,6 +343,24 @@
     });
     updateFontSize();
 
+    // Restore button
+    restoreBtn.addEventListener('click', () => {
+      editor.innerHTML = lastValidContent;
+    });
+
+    // Font Toggle Button
+    let isNanumFont = false;
+    fontToggleBtn.addEventListener('click', () => {
+      if (isNanumFont) {
+        editor.style.fontFamily = "'Gaegu', cursive";
+        isNanumFont = false;
+      } else {
+        editor.style.fontFamily = "'Nanum Myeongjo', serif";
+        isNanumFont = true;
+      }
+    });
+
+    // Clear
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
@@ -279,6 +371,7 @@
       editor.innerHTML = '';
       localStorage.removeItem('saved-text');
       clearConfirm.style.display = 'none';
+      lastValidContent = '';  // Disable restoration after clear
     });
 
     saveBtn.addEventListener('click', () => {
@@ -292,5 +385,19 @@
       link.remove();
     });
   </script>
+
+  <!-- PWA: Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+      });
+    }
+  </script>
+
 </body>
 </html>
