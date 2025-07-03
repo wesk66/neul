@@ -4,14 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul늘</title>
-
-  <!-- Fonts: Original + Added Nanum Myeongjo for Hangul support -->
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Nanum+Myeongjo&display=swap" rel="stylesheet" />
 
-  <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
-
-  <!-- PWA: Add theme color for address bar -->
   <meta name="theme-color" content="#64b5f6" />
 
   <style>
@@ -78,9 +73,9 @@
       user-select: text;
     }
     #editor * {
-      font-family: 'Gaegu', cursive !important;
       font-size: inherit !important;
     }
+
     ::selection {
       background: #dcdcdc;
       color: inherit;
@@ -122,13 +117,16 @@
       padding: 0;
       line-height: 1;
     }
+
     .float-buttons button:hover {
       transform: scale(1.05);
       border-color: #999;
     }
+
     .float-buttons button.rotate-left {
       transform: rotate(-180deg);
     }
+
     .float-buttons button.rotate-right {
       transform: rotate(180deg);
     }
@@ -171,6 +169,7 @@
       padding: 0;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
+
     #clear-btn:hover {
       transform: scale(1.05);
       border-color: #999;
@@ -189,6 +188,7 @@
       z-index: 19;
       user-select: none;
     }
+
     #clear-confirm button {
       margin: 0 0.3rem;
       font-family: 'Gaegu', cursive;
@@ -201,6 +201,7 @@
       color: black !important;
       user-select: none;
     }
+
     #clear-confirm button:hover {
       background-color: #cce4ff;
       transform: scale(1.15);
@@ -249,10 +250,7 @@
   <div class="float-buttons">
     <button id="highlight-btn">ㄱ</button>
     <button id="italic-btn">ㄴ</button>
-    <button id="font-size-btn">
-      <div class="circle" id="circle-indicator"></div>
-    </button>
-    <!-- Added font toggle button -->
+    <button id="font-size-btn"><div id="circle-indicator"></div></button>
     <button id="font-toggle-btn">F</button>
   </div>
 
@@ -276,16 +274,38 @@
     const saveBtn = document.getElementById('save-btn');
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
+    const fontToggleBtn = document.getElementById('font-toggle-btn');
+
+    let isAltFont = false;
+    let currentFont = "'Gaegu', cursive";
+
+    function applyFontRecursively(el, font) {
+      if (!el || !el.childNodes) return;
+      el.style.fontFamily = font;
+      Array.from(el.children).forEach(child => {
+        child.removeAttribute("style");
+        applyFontRecursively(child, font);
+      });
+    }
+
+    fontToggleBtn.addEventListener('click', () => {
+      isAltFont = !isAltFont;
+      currentFont = isAltFont ? "'Nanum Myeongjo', serif" : "'Gaegu', cursive";
+      applyFontRecursively(editor, currentFont);
+    });
+
+    editor.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
+      applyFontRecursively(editor, currentFont);
+    });
 
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
       if (saved) editor.innerHTML = saved;
-      setTimeout(() => {
-        openingText.style.opacity = '0';
-      }, 1500);
-      setTimeout(() => {
-        openingText.style.display = 'none';
-      }, 4000);
+      setTimeout(() => openingText.style.opacity = '0', 1500);
+      setTimeout(() => openingText.style.display = 'none', 4000);
     });
 
     window.addEventListener('beforeunload', () => {
@@ -357,29 +377,18 @@
       link.click();
       link.remove();
     });
-
-    // Font toggle logic
-    const fontToggleBtn = document.getElementById('font-toggle-btn');
-    let isAltFont = false;
-    fontToggleBtn.addEventListener('click', () => {
-      isAltFont = !isAltFont;
-      const newFont = isAltFont ? "'Nanum Myeongjo', serif" : "'Gaegu', cursive";
-      editor.style.fontFamily = newFont;
-      editor.querySelectorAll('*').forEach(el => {
-        el.style.fontFamily = newFont;
-      });
-    });
   </script>
 
-  <!-- PWA: Register service worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        }).catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
       });
     }
   </script>
