@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>neul늘</title>
+  <title>neul 늘</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&family=Nanum+Myeongjo&display=swap" rel="stylesheet" />
 
   <link rel="manifest" href="/manifest.json" />
@@ -243,7 +243,7 @@
   </script>
 </head>
 <body>
-  <div id="opening-text">vertical orientation suggested</div>
+  <div id="opening-text">vertical orientation suggested on mobile</div>
 
   <button id="save-btn">s</button>
 
@@ -251,7 +251,7 @@
     <button id="highlight-btn">ㄱ</button>
     <button id="italic-btn">ㄴ</button>
     <button id="font-size-btn"><div id="circle-indicator"></div></button>
-    <button id="font-toggle-btn">F</button>
+    <button id="font-toggle-btn">f</button>
   </div>
 
   <button id="clear-btn">e</button>
@@ -372,7 +372,7 @@
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'neul-writing.txt';
+      link.download = 'my-writing.txt';
       document.body.appendChild(link);
       link.click();
       link.remove();
