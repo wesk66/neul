@@ -251,10 +251,8 @@
     <button id="font-size-btn">
       <div class="circle" id="circle-indicator"></div>
     </button>
-    <!-- New "r" button -->
-    <button id="restore-btn">r</button>
-    <!-- New "f" button -->
-    <button id="font-toggle-btn">f</button>
+    <!-- Removed "r" button -->
+    <!-- Removed "f" button -->
   </div>
 
   <button id="clear-btn">e</button>
@@ -275,8 +273,6 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
-    const restoreBtn = document.getElementById('restore-btn');  // Restore button
-    const fontToggleBtn = document.getElementById('font-toggle-btn');  // Font toggle button
     const circle = document.getElementById('circle-indicator');
     const openingText = document.getElementById('opening-text');
 
@@ -342,23 +338,6 @@
       updateFontSize();
     });
     updateFontSize();
-
-    // Restore button
-    restoreBtn.addEventListener('click', () => {
-      editor.innerHTML = lastValidContent;
-    });
-
-    // Font Toggle Button
-    let isNanumFont = false;
-    fontToggleBtn.addEventListener('click', () => {
-      if (isNanumFont) {
-        editor.style.fontFamily = "'Gaegu', cursive";
-        isNanumFont = false;
-      } else {
-        editor.style.fontFamily = "'Nanum Myeongjo', serif";
-        isNanumFont = true;
-      }
-    });
 
     // Clear
     clearBtn.addEventListener('click', () => {
