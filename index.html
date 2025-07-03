@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>neul늘</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
-
-  <!-- webfont imports -->
-  <link rel="stylesheet" href="https://unpkg.com/chiron-hei-hk-webfont/css/vf.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/nanummyeongjo.css">
-  <link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&family=Diphylleia&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Sunflower&display=swap" rel="stylesheet" />
+  
   <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
 
@@ -80,10 +76,12 @@
       line-height: 1.4;
       user-select: text;
     }
+
     #editor * {
       font-family: 'Gaegu', cursive !important;
       font-size: inherit !important;
     }
+
     ::selection {
       background: #dcdcdc;
       color: inherit;
@@ -125,32 +123,10 @@
       padding: 0;
       line-height: 1;
     }
+
     .float-buttons button:hover {
       transform: scale(1.05);
       border-color: #999;
-    }
-    .float-buttons button.rotate-left {
-      transform: rotate(-180deg);
-    }
-    .float-buttons button.rotate-right {
-      transform: rotate(180deg);
-    }
-
-    #font-size-btn {
-      margin-top: 12.5rem;
-      position: relative;
-    }
-
-    #circle-indicator {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 2px solid #222;
-      border-radius: 50%;
-      width: 10px;
-      height: 10px;
-      pointer-events: none;
     }
 
     #clear-btn {
@@ -174,6 +150,7 @@
       padding: 0;
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
+
     #clear-btn:hover {
       transform: scale(1.05);
       border-color: #999;
@@ -192,6 +169,7 @@
       z-index: 19;
       user-select: none;
     }
+
     #clear-confirm button {
       margin: 0 0.3rem;
       font-family: 'Gaegu', cursive;
@@ -204,6 +182,7 @@
       color: black !important;
       user-select: none;
     }
+
     #clear-confirm button:hover {
       background-color: #cce4ff;
       transform: scale(1.15);
@@ -231,66 +210,32 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* updated font-size for highlight and italic buttons */
-    #highlight-btn,
-    #italic-btn {
-      font-size: 1.8rem;
-    }
-
-    .font-selector {
-      position: relative;
-      display: inline-block;
-    }
-    .font-dropdown {
+    /* Font Dropdown Styles */
+    #font-dropdown {
       display: none;
       position: absolute;
-      background: #fff;
+      top: 50px;
+      right: 0;
+      width: 180px;
+      background: white;
       border: 1px solid #ccc;
-      z-index: 100;
-      width: max-content;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+      z-index: 10;
     }
-    .font-dropdown div {
-      padding: 5px 10px;
+
+    #font-dropdown div {
       cursor: pointer;
-      font-family: Gaegu, sans-serif;
+      padding: 5px 0;
+      font-size: 1.2rem;
     }
-    .font-selector.show .font-dropdown { display: block; }
+
+    #font-dropdown div:hover {
+      background: #f0f0f0;
+    }
+
   </style>
-</head>
-<body>
-  <div id="opening-text">vertical orientation suggested</div>
-
-  <button id="save-btn">s</button>
-
-  <div class="float-buttons">
-    <button id="highlight-btn">ㄱ</button>
-    <button id="italic-btn">ㄴ</button>
-    <button id="font-size-btn">
-      <div class="circle" id="circle-indicator"></div>
-    </button>
-
-    <!-- undo button (labeled "r") -->
-    <button id="undoBtn">r</button>
-
-    <!-- font button (labeled "f") -->
-    <button id="fontToggleBtn" class="font-btn">f</button>
-    <div class="font-dropdown">
-      <!-- font choices displayed in their respective fonts -->
-      <div style="font-family: 'Chiron Hei HK';">Chiron Hei HK 조원흑체</div>
-      <div style="font-family: 'Nanum Myeongjo', serif;">Nanum Myeongjo 나눔명조</div>
-      <div style="font-family: 'Yeon Sung', cursive;">Yeon Sung 연성</div>
-      <div style="font-family: 'Diphylleia', serif;">Diphylleia</div>
-      <div style="font-family: 'Gaegu', cursive;">Gaegu</div>
-    </div>
-  </div>
-
-  <button id="clear-btn">e</button>
-  <div id="clear-confirm">
-    <button id="confirm-clear">confirm</button>
-    <button id="cancel-clear">cancel</button>
-  </div>
-
-  <div id="editor" contenteditable="true" spellcheck="false"></div>
 
   <script>
     const editor = document.getElementById('editor');
@@ -304,14 +249,13 @@
     const saveBtn = document.getElementById('save-btn');
     const undoBtn = document.getElementById('undoBtn');
     const fontToggleBtn = document.getElementById('fontToggleBtn');
-    const fontDropdown = document.querySelector('.font-dropdown');
+    const fontDropdown = document.getElementById('font-dropdown');
     const openingText = document.getElementById('opening-text');
 
     const fontMap = {
       'Chiron Hei HK 조원흑체': "'Chiron Hei HK', serif",
       'Nanum Myeongjo 나눔명조': "'Nanum Myeongjo', serif",
-      'Yeon Sung 연성': "'Yeon Sung', cursive",
-      'Diphylleia': "'Diphylleia', serif",
+      'Sunflower': "'Sunflower', sans-serif",
       'Gaegu': "'Gaegu', cursive"
     };
 
@@ -343,19 +287,19 @@
       localStorage.setItem('saved-text', editor.innerHTML);
     });
 
-    editor.addEventListener('input', () => {
-      pushUndoState();
+    fontSizeBtn.addEventListener('click', () => {
+      fontDropdown.style.display = fontDropdown.style.display === 'block' ? 'none' : 'block';
     });
 
-    undoBtn.addEventListener('click', () => {
-      if (undoStack.length < 2) return;
-      undoStack.pop();
-      const lastState = undoStack[undoStack.length - 1];
-      if (lastState !== undefined) {
-        ignoreUndoPush = true;
-        editor.innerHTML = lastState;
-        ignoreUndoPush = false;
-      }
+    function changeFont(font) {
+      editor.style.fontFamily = fontMap[font];
+      fontDropdown.style.display = 'none';
+    }
+
+    document.querySelectorAll('#font-dropdown div').forEach(div => {
+      div.addEventListener('click', () => {
+        changeFont(div.innerText);
+      });
     });
 
     highlightBtn.addEventListener('click', () => {
@@ -385,27 +329,13 @@
       pushUndoState();
     });
 
-    const sizes = [
-      { size: '1.0rem', circle: '2px' },
-      { size: '1.4rem', circle: '6px' },
-      { size: '1.8rem', circle: '10px' }
-    ];
-    let currentSize = 1;
-
-    function updateFontSize() {
-      const size = sizes[currentSize];
-      editor.style.fontSize = size.size;
-      const circle = document.getElementById('circle-indicator');
-      circle.style.width = size.circle;
-      circle.style.height = size.circle;
-    }
-
-    fontSizeBtn.addEventListener('click', () => {
-      currentSize = (currentSize + 1) % sizes.length;
-      updateFontSize();
+    // Functionality for undo
+    undoBtn.addEventListener('click', () => {
+      if (undoStack.length === 0) return;
+      ignoreUndoPush = true;
+      editor.innerHTML = undoStack.pop();
+      ignoreUndoPush = false;
     });
-
-    updateFontSize();
 
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
@@ -419,10 +349,7 @@
       editor.innerHTML = '';
       localStorage.removeItem('saved-text');
       clearConfirm.style.display = 'none';
-      undoStack = [];
-      ignoreUndoPush = true;
       pushUndoState();
-      ignoreUndoPush = false;
     });
 
     saveBtn.addEventListener('click', () => {
@@ -435,44 +362,7 @@
       link.click();
       link.remove();
     });
-
-    fontToggleBtn.addEventListener('click', () => {
-      fontToggleBtn.classList.toggle('active');
-      if (fontToggleBtn.classList.contains('active')) {
-        fontDropdown.style.display = 'block';
-      } else {
-        fontDropdown.style.display = 'none';
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!fontToggleBtn.contains(e.target) && !fontDropdown.contains(e.target)) {
-        fontDropdown.style.display = 'none';
-        fontToggleBtn.classList.remove('active');
-      }
-    });
-
-    fontDropdown.querySelectorAll('div').forEach(div => {
-      div.addEventListener('click', () => {
-        const fontName = div.textContent.trim();
-        const fontFamily = fontMap[fontName] || "'Gaegu', cursive";
-        editor.style.fontFamily = fontFamily;
-        fontDropdown.style.display = 'none';
-        fontToggleBtn.classList.remove('active');
-      });
-    });
   </script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        }).catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-      });
-    }
-  </script>
 </body>
 </html>
