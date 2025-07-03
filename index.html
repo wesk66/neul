@@ -1,1 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>neul늘</title>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
 
+  <!-- PWA: Add manifest -->
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- PWA: Add theme color for address bar -->
+  <meta name="theme-color" content="#64b5f6" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Gaegu', cursive;
+      background: white;
+      overflow: hidden;
+      position: relative;
+      max-width: 100vw;
+      max-height: 100vh;
+      -webkit-touch-callout: none;
+      -webkit-text-size-adjust: none;
+      touch-action: manipulation;
+    }
+
+    button, a, input, textarea {
+      touch-action: manipulation;
+    }
+
+    #opening-text {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      color: #222;
+      opacity: 1;
+      pointer-events: none;
+      user-select: none;
+      z-index: 10;
+      max-width: 90vw;
+      text-align: center;
+      white-space: normal;
+      transition: opacity 2.5s ease-in-out;
+    }
+
+    #editor {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 2.5rem 7rem 0.5rem 1rem;
+      font-size: 1.8rem;
+      color: #222;
+      background: transparent;
+      white-space: pre-wrap;
+      word-break: break-word;
+      outline: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-width: 100vw;
+      max-height: 100vh;
+      font-family: 'Gaegu', cursive;
+      line-height: 1.4;
+      user-select: text;
+    }
+    #editor * {
+      font-family: 'Gaegu', cursive !important;
+      font-size: inherit !important;
+    }
+    ::selection {
+      background: #dcdcdc;
+      color: inherit;
+    }
+
+    .float-buttons {
+      position: fixed;
+      right: 1.1rem;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      z-index: 15;
+      padding-left: 0.6rem;
+      border-left: 1px solid rgba(0,0,0,0.1);
+      background: transparent;
+      user-select: none;
+      height: 100vh;
+      justify-content: center;
+    }
+
+    .float-buttons button {
+      width: 40px;
+      height: 40px;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.5rem;
+      border: 1.5px solid #ccc;
+      background: white;
+      color: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.3s ease;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+    }
+    .float-buttons button:hover {
+      transform: scale(1.05);
+      border-color: #999;
+    }
+    .float-buttons button.rotate-left {
+      transform: rotate(-180deg);
+    }
+    .float-buttons button.rotate-right {
+      transform: rotate(180deg);
+    }
+
+    #font-size-btn {
+      margin-top: 12.5rem;
+      position: relative;
+    }
+
+    #circle-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px solid #222;
+      border-radius: 50%;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+    }
+
+    #clear-btn {
+      position: fixed;
+      bottom: 2.5rem;
+      right: 1rem;
+      z-index: 20;
+      width: 40px;
+      height: 40px;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.3rem;
+      border: 1.5px solid #ccc;
+      background: white;
+      color: #222;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      padding: 0;
+      transition: transform 0.2s ease, border-color 0.3s ease;
+    }
+    #clear-btn:hover {
+      transform: scale(1.05);
+      border-color: #999;
+    }
+
+    #clear-confirm {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 1rem;
+      background: #eee;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      display: none;
+      font-family: 'Gaegu', cursive;
+      z-index: 19;
+      user-select: none;
+    }
+    #clear-confirm button {
+      margin: 0 0.3rem;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.1rem;
+      background: white;
+      border: 1px solid #999;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      color: black !important;
+      user-select: none;
+    }
+    #clear-confirm button:hover {
+      background-color: #cce4ff;
+      transform: scale(1.15);
+    }
+
+    #save-btn {
+      position: fixed;
+      top: 2.5rem;
+      right: 1rem;
+      z-index: 20;
+      width: 40px;
+      height: 40px;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.3rem;
+      line-height: 1;
+      padding: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      background: white;
+      border: 1.5px solid #ccc;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, border-color 0.3s ease;
+    }
+
+    /* updated font-size for highlight and italic buttons */
+    #highlight-btn,
+    #italic-btn {
+      font-size: 1.8rem;
+    }
+
+  </style>
+
+  <script>
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+  </script>
+</head>
+<body>
+  <div id="opening-text">vertical orientation suggested on mobile</div>
+
+  <button id="save-btn">s</button>
+
+  <div class="float-buttons">
+    <button id="highlight-btn">ㄱ</button>
+    <button id="italic-btn">ㄴ</button>
+    <button id="font-size-btn">
+      <div class="circle" id="circle-indicator"></div>
+    </button>
+  </div>
+
+  <button id="clear-btn">e</button>
+  <div id="clear-confirm">
+    <button id="confirm-clear">confirm</button>
+    <button id="cancel-clear">cancel</button>
+  </div>
+
+  <div id="editor" contenteditable="true" spellcheck="false"></div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    const highlightBtn = document.getElementById('highlight-btn');
+    const italicBtn = document.getElementById('italic-btn');
+    const fontSizeBtn = document.getElementById('font-size-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const clearConfirm = document.getElementById('clear-confirm');
+    const confirmClear = document.getElementById('confirm-clear');
+    const cancelClear = document.getElementById('cancel-clear');
+    const saveBtn = document.getElementById('save-btn');
+
+    const circle = document.getElementById('circle-indicator');
+    const openingText = document.getElementById('opening-text');
+
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('saved-text');
+      if (saved) editor.innerHTML = saved;
+      setTimeout(() => {
+        openingText.style.opacity = '0';
+      }, 1500);
+      setTimeout(() => {
+        openingText.style.display = 'none';
+      }, 4000);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('saved-text', editor.innerHTML);
+    });
+
+    highlightBtn.addEventListener('click', () => {
+      highlightBtn.classList.toggle('rotate-left');
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.backgroundColor = '#64b5f6';
+      span.style.lineHeight = '1.4';
+      span.style.display = 'inline';
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      selection.removeAllRanges();
+    });
+
+    italicBtn.addEventListener('click', () => {
+      italicBtn.classList.toggle('rotate-right');
+      const selection = window.getSelection();
+      if (!selection.rangeCount || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const em = document.createElement('em');
+      em.appendChild(range.extractContents());
+      range.insertNode(em);
+      selection.removeAllRanges();
+    });
+
+    const sizes = [
+      { size: '1.0rem', circle: '2px' },
+      { size: '1.4rem', circle: '6px' },
+      { size: '1.8rem', circle: '10px' }
+    ];
+    let currentSize = 1;
+    function updateFontSize() {
+      const size = sizes[currentSize];
+      editor.style.fontSize = size.size;
+      circle.style.width = size.circle;
+      circle.style.height = size.circle;
+    }
+    fontSizeBtn.addEventListener('click', () => {
+      currentSize = (currentSize + 1) % sizes.length;
+      updateFontSize();
+    });
+    updateFontSize();
+
+    clearBtn.addEventListener('click', () => {
+      clearConfirm.style.display = 'block';
+    });
+    cancelClear.addEventListener('click', () => {
+      clearConfirm.style.display = 'none';
+    });
+    confirmClear.addEventListener('click', () => {
+      editor.innerHTML = '';
+      localStorage.removeItem('saved-text');
+      clearConfirm.style.display = 'none';
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const text = editor.innerText;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'neul-writing.txt';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+  </script>
+
+  <!-- PWA: Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(error => {
+          console.error('Service Worker registration failed:', error);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
