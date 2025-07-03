@@ -6,6 +6,11 @@
   <title>neul늘</title>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu&display=swap" rel="stylesheet" />
 
+  <!-- webfont imports -->
+  <link rel="stylesheet" href="https://unpkg.com/chiron-hei-hk-webfont/css/vf.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/nanummyeongjo.css">
+  <link href="https://fonts.googleapis.com/css2?family=Yeon+Sung&family=Diphylleia&display=swap" rel="stylesheet">
+
   <!-- PWA: Add manifest -->
   <link rel="manifest" href="/manifest.json" />
 
@@ -226,19 +231,31 @@
       transition: transform 0.2s ease, border-color 0.3s ease;
     }
 
-    /* Updated font-size for highlight and italic buttons */
+    /* updated font-size for highlight and italic buttons */
     #highlight-btn,
     #italic-btn {
       font-size: 1.8rem;
     }
 
+    .font-selector {
+      position: relative;
+      display: inline-block;
+    }
+    .font-dropdown {
+      display: none;
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      z-index: 100;
+      width: max-content;
+    }
+    .font-dropdown div {
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: Gaegu, sans-serif;
+    }
+    .font-selector.show .font-dropdown { display: block; }
   </style>
-
-  <script>
-    document.addEventListener('gesturestart', function (e) {
-      e.preventDefault();
-    });
-  </script>
 </head>
 <body>
   <div id="opening-text">vertical orientation suggested</div>
@@ -251,6 +268,20 @@
     <button id="font-size-btn">
       <div class="circle" id="circle-indicator"></div>
     </button>
+
+    <!-- undo button (labeled "r") -->
+    <button id="undoBtn">r</button>
+
+    <!-- font button (labeled "f") -->
+    <button id="fontToggleBtn" class="font-btn">f</button>
+    <div class="font-dropdown">
+      <!-- font choices displayed in their respective fonts -->
+      <div style="font-family: 'Chiron Hei HK';">Chiron Hei HK 조원흑체</div>
+      <div style="font-family: 'Nanum Myeongjo', serif;">Nanum Myeongjo 나눔명조</div>
+      <div style="font-family: 'Yeon Sung', cursive;">Yeon Sung 연성</div>
+      <div style="font-family: 'Diphylleia', serif;">Diphylleia</div>
+      <div style="font-family: 'Gaegu', cursive;">Gaegu</div>
+    </div>
   </div>
 
   <button id="clear-btn">e</button>
@@ -271,13 +302,35 @@
     const confirmClear = document.getElementById('confirm-clear');
     const cancelClear = document.getElementById('cancel-clear');
     const saveBtn = document.getElementById('save-btn');
-
-    const circle = document.getElementById('circle-indicator');
+    const undoBtn = document.getElementById('undoBtn');
+    const fontToggleBtn = document.getElementById('fontToggleBtn');
+    const fontDropdown = document.querySelector('.font-dropdown');
     const openingText = document.getElementById('opening-text');
+
+    const fontMap = {
+      'Chiron Hei HK 조원흑체': "'Chiron Hei HK', serif",
+      'Nanum Myeongjo 나눔명조': "'Nanum Myeongjo', serif",
+      'Yeon Sung 연성': "'Yeon Sung', cursive",
+      'Diphylleia': "'Diphylleia', serif",
+      'Gaegu': "'Gaegu', cursive"
+    };
+
+    let undoStack = [];
+    let ignoreUndoPush = false;
+
+    function pushUndoState() {
+      if (ignoreUndoPush) return;
+      if (undoStack.length > 50) undoStack.shift();
+      undoStack.push(editor.innerHTML);
+    }
 
     window.addEventListener('load', () => {
       const saved = localStorage.getItem('saved-text');
-      if (saved) editor.innerHTML = saved;
+      if (saved) {
+        editor.innerHTML = saved;
+      }
+      pushUndoState();
+
       setTimeout(() => {
         openingText.style.opacity = '0';
       }, 1500);
@@ -288,6 +341,21 @@
 
     window.addEventListener('beforeunload', () => {
       localStorage.setItem('saved-text', editor.innerHTML);
+    });
+
+    editor.addEventListener('input', () => {
+      pushUndoState();
+    });
+
+    undoBtn.addEventListener('click', () => {
+      if (undoStack.length < 2) return;
+      undoStack.pop();
+      const lastState = undoStack[undoStack.length - 1];
+      if (lastState !== undefined) {
+        ignoreUndoPush = true;
+        editor.innerHTML = lastState;
+        ignoreUndoPush = false;
+      }
     });
 
     highlightBtn.addEventListener('click', () => {
@@ -302,6 +370,7 @@
       span.appendChild(range.extractContents());
       range.insertNode(span);
       selection.removeAllRanges();
+      pushUndoState();
     });
 
     italicBtn.addEventListener('click', () => {
@@ -313,6 +382,7 @@
       em.appendChild(range.extractContents());
       range.insertNode(em);
       selection.removeAllRanges();
+      pushUndoState();
     });
 
     const sizes = [
@@ -321,28 +391,38 @@
       { size: '1.8rem', circle: '10px' }
     ];
     let currentSize = 1;
+
     function updateFontSize() {
       const size = sizes[currentSize];
       editor.style.fontSize = size.size;
+      const circle = document.getElementById('circle-indicator');
       circle.style.width = size.circle;
       circle.style.height = size.circle;
     }
+
     fontSizeBtn.addEventListener('click', () => {
       currentSize = (currentSize + 1) % sizes.length;
       updateFontSize();
     });
+
     updateFontSize();
 
     clearBtn.addEventListener('click', () => {
       clearConfirm.style.display = 'block';
     });
+
     cancelClear.addEventListener('click', () => {
       clearConfirm.style.display = 'none';
     });
+
     confirmClear.addEventListener('click', () => {
       editor.innerHTML = '';
       localStorage.removeItem('saved-text');
       clearConfirm.style.display = 'none';
+      undoStack = [];
+      ignoreUndoPush = true;
+      pushUndoState();
+      ignoreUndoPush = false;
     });
 
     saveBtn.addEventListener('click', () => {
@@ -355,9 +435,34 @@
       link.click();
       link.remove();
     });
+
+    fontToggleBtn.addEventListener('click', () => {
+      fontToggleBtn.classList.toggle('active');
+      if (fontToggleBtn.classList.contains('active')) {
+        fontDropdown.style.display = 'block';
+      } else {
+        fontDropdown.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!fontToggleBtn.contains(e.target) && !fontDropdown.contains(e.target)) {
+        fontDropdown.style.display = 'none';
+        fontToggleBtn.classList.remove('active');
+      }
+    });
+
+    fontDropdown.querySelectorAll('div').forEach(div => {
+      div.addEventListener('click', () => {
+        const fontName = div.textContent.trim();
+        const fontFamily = fontMap[fontName] || "'Gaegu', cursive";
+        editor.style.fontFamily = fontFamily;
+        fontDropdown.style.display = 'none';
+        fontToggleBtn.classList.remove('active');
+      });
+    });
   </script>
 
-  <!-- PWA: Register service worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -369,6 +474,5 @@
       });
     }
   </script>
-
 </body>
 </html>
