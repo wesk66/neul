@@ -236,19 +236,26 @@
     #italic-btn {
       font-size: 1.8rem;
     }
-
-    .font-selector {
-      position: relative;
-      display: inline-block;
-    }
+ .font-selector {
+  position: relative;  /* Ensures the child .font-dropdown is positioned relative to this */
+  display: inline-block;
+  left: -2rem;         /* Moves the entire font selector 2rem to the left (adjust as needed) */
+  top: 3rem;           /* Moves the entire font selector 3rem down (adjust as needed) */
+}
     .font-dropdown {
-      display: none;
-      position: absolute;
-      background: #fff;
-      border: 1px solid #ccc;
-      z-index: 100;
-      width: max-content;
-    }
+  display: none;  /* This keeps it hidden initially */
+  position: absolute;  /* Positions it relative to the parent */
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 100;
+  width: max-content;
+  left: -2rem;   /* Move it 2rem to the left */
+  top: 3rem;     /* Move it 3rem down */
+}
+
+.font-selector:hover .font-dropdown {
+  display: block;  /* Shows the dropdown when hovering over the font selector */
+}
     .font-dropdown div {
       padding: 5px 10px;
       cursor: pointer;
@@ -276,11 +283,11 @@
     <button id="fontToggleBtn" class="font-btn">f</button>
     <div class="font-dropdown">
       <!-- font choices displayed in their respective fonts -->
-      <div style="font-family: 'Chiron Hei HK';">Chiron Hei HK 조원흑체</div>
-      <div style="font-family: 'Nanum Myeongjo', serif;">Nanum Myeongjo 나눔명조</div>
-      <div style="font-family: 'Yeon Sung', cursive;">Yeon Sung 연성</div>
-      <div style="font-family: 'Diphylleia', serif;">Diphylleia</div>
-      <div style="font-family: 'Gaegu', cursive;">Gaegu</div>
+      <div style="font-family: 'Chiron Hei HK';">one 하나</div>
+      <div style="font-family: 'Nanum Myeongjo', serif;">two 둘</div>
+      <div style="font-family: 'Yeon Sung', cursive;">three 셋</div>
+      <div style="font-family: 'Diphylleia', serif;">four 넷</div>
+      <div style="font-family: 'Gaegu', cursive;">five 다섯</div>
     </div>
   </div>
 
